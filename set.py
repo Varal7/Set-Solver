@@ -85,6 +85,11 @@ class Set():
 
     def save_sets(self, save_folder, prefix):
         filenames = []
+        try:
+            os.makedirs(save_folder)
+        except:
+            pass
+
         for i in range(len(self.sets)):
             cur_set = self.sets[i]
             disp = self.draw_set(cur_set)

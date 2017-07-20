@@ -23,10 +23,10 @@ def handle_cards(filename):
     # Compute sets
     my_set = set.Set(im, contours, cards)
     # Show sets
-    my_set.show_sets()
+    # my_set.show_sets()
     # Write sets
     prefix = os.path.basename(args.filename).split(".")[0]
-    my_set.show_sets("save", prefix)
+    my_set.save_sets("save", prefix)
 
 
 def print_card(filename):
