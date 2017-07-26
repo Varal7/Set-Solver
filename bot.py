@@ -6,7 +6,10 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import os
 import card
+import functools
 import set
+from queue import Queue
+from threading import Thread
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -34,18 +37,48 @@ def start(bot, update):
 def help(bot, update):
     update.message.reply_text('Send me a photo with at least 4 SET cards and I will try to find sets in it')
 
+
+class SetWorker(Thread):
+    def __init__(self, update, queue, im, trained, cards):
+        Thread.__init__(self)
+        self.queue = queue
+        self.im = im
+        self.trained = trained
+        self.cards = cards
+        self.update = update
+
+    def run(self):
+        while True:
+            contour = self.queue.get()
+            my_card = card.Card(self.im, contour)
+            my_card.predict(self.trained)
+            #self.update.message.reply_text(str(my_card))
+            self.cards.append((contour, my_card))
+            self.queue.task_done()
+
+
 def handle_cards(update, filename):
     # Read cards
+    queue = Queue()
     im, contours = card.get_im_contours(filename)
     contours = card.filter_cards_contours(contours)
-    update.message.reply_text("I've found " + str(len(contours)) + "cards.")
+    update.message.reply_text("I've found " + str(len(contours)) + "cards")
+    update.message.reply_text("Let me see...")
     trained = card.load_trained()
     cards = []
     for contour in contours:
-        my_card = card.Card(im, contour)
-        my_card.predict(trained)
-        cards.append(my_card)
-        update.message.reply_text(str(my_card))
+        worker = SetWorker(update, queue, im, trained, cards)
+        worker.daemon = True
+        worker.start()
+
+    for contour in contours:
+        queue.put(contour)
+
+    queue.join()
+    contours, cards = zip(*cards)
+    update.message.reply_text(
+            functools.reduce(lambda x,y: x + "," + y, map(str, cards))
+            )
 
     my_set = set.Set(im, contours, cards)
     prefix = os.path.basename(filename).split(".")[0]
