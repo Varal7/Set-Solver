@@ -16,9 +16,9 @@ CANVAS_SIZE = 500
 EXTENSIONS = ['.png', '.jpg']
 number_to_int = {'one': 1, 'two': 2, 'three': 3}
 boundaries = {
-        'green': ([50, 100, 10], [120, 250, 50]),
-        'red': ([50, 50, 200], [80, 80, 250]),
-        'purple': ([100, 50, 100], [150, 80, 150]),
+        'green': [([40, 50, 50], [80, 255, 255])],
+        'red': [([0, 50, 50], [10, 255, 255]), ([175, 50, 50], [255, 255, 255])],
+        'purple': [([120, 50, 50], [165, 255, 255])],
 }
 carac_names = ['color', 'number', 'fill', 'shape']
 
@@ -99,12 +99,18 @@ class Card():
 
     def predict_color(self):
         color = "unkown"
+        image = self.card
+        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         maxi = -1
-        for cur_color, (lower, upper) in boundaries.items():
-            lower = np.array(lower, dtype="uint8")
-            upper = np.array(upper, dtype="uint8")
-            mask = cv2.inRange(self.card, lower, upper)
-            output = cv2.bitwise_and(self.card, self.card, mask=mask)
+        for cur_color, bounds in boundaries.items():
+            mask = np.zeros(image.shape[:2], dtype = "uint8")
+            for (lower, upper) in bounds:
+                lower = np.array(lower, dtype = "uint8")
+                upper = np.array(upper, dtype = "uint8")
+                cur_mask = cv2.inRange(hsv, lower, upper)
+                mask += cur_mask
+            output = cv2.bitwise_and(image, image, mask = mask)
+            #output_hsv = cv2.bitwise_and(hsv, hsv, mask = mask)
             count = np.count_nonzero(output)
 
             if count > maxi:
