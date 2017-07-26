@@ -79,7 +79,6 @@ def error(bot, update, error):
 def main():
     # Create the EventHandler and pass it your bot's token.
     token = open("TOKEN", 'r').read().strip()
-    import pdb; pdb.set_trace()
     updater = Updater(token)
 
     # Get the dispatcher to register handlers
