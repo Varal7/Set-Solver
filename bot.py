@@ -62,7 +62,8 @@ def handle_cards(update, filename):
     queue = Queue()
     im, contours = card.get_im_contours(filename)
     contours = card.filter_cards_contours(contours)
-    update.message.reply_text("I've found " + str(len(contours)) + "cards")
+    update.message.reply_text("I can see " + str(len(contours)) + " cards")
+    update.message.reply_text("Not sure what they are, though")
     update.message.reply_text("Let me see...")
     trained = card.load_trained()
     cards = []
@@ -76,6 +77,7 @@ def handle_cards(update, filename):
 
     queue.join()
     contours, cards = zip(*cards)
+    update.message.reply_text("Here's what I got:")
     update.message.reply_text(
             functools.reduce(lambda x,y: x + "," + y, map(str, cards))
             )
