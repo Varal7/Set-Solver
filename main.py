@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Scan image for SET card')
 
 parser.add_argument('filename', type=str, help="Filename to do something from")
 
+
 def handle_cards(filename):
     # Read cards
     im, contours = card.get_im_contours(filename)
@@ -26,7 +27,8 @@ def handle_cards(filename):
     # my_set.show_sets()
     # Write sets
     prefix = os.path.basename(args.filename).split(".")[0]
-    my_set.save_sets("save", prefix)
+    filenames = my_set.save_sets("save", prefix)
+    return filenames
 
 
 def print_card(filename):
@@ -39,4 +41,4 @@ def print_card(filename):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    handle_cards(args.filename)
+    filenames = handle_cards(args.filename)

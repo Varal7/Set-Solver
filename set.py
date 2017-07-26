@@ -95,7 +95,7 @@ class Set():
             disp = self.draw_set(cur_set)
             resized = imutils.resize(disp, width=800)
             filename = prefix + "_" + str(i) + ".jpg"
-            filenames.append(filename)
             dest = os.path.join(save_folder, filename)
+            filenames.append(dest)
             cv2.imwrite(dest, resized)
         return filenames
